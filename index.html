@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>converteer latex voor ans</title>
+        <style>
+            body {
+                background: url('https://staff.fnwi.uva.nl/l.torenvliet/greenred_marble.gif');
+                min-height: calc(100vh - 30px);
+                display: flex;
+                flex-direction: column;
+            }
+
+            textarea {
+                width: calc(100% - .5rem);
+                resize: none;
+                height: 245.3px;
+                overflow: hidden;
+            }
+
+            #input {
+                height: 600px;
+            }
+
+            code {
+                background-color: black;
+                color: white;
+            }
+
+            .mooie-afb {
+                max-width: 100%;
+            }
+
+            td, tr {
+                vertical-align: top;
+                background-color: white;
+                width: 100%;
+                border: 3px solid black;
+                border-radius: 5px;
+            }
+
+            td .half-width, tr .half-width {
+                width: 50%;
+            }
+
+            td .full-width {
+                width: 100%;
+            }
+
+            table, tr {
+                width: 100%;
+            }
+
+            footer {
+                margin-top: auto;
+            }
+        </style>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.css" integrity="sha384-KiWOvVjnN8qwAZbuQyWDIbfCLFhLXNETzBQjA/92pIowpC0d2O3nppDGQVgwd2nB" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.js" integrity="sha384-0fdwu/T/EQMsQlrHCCHoH10pkPLlKA1jL5dFyUOvB3lfeT2540/2g6YgSi2BL14p" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/auto-render.min.js" integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <img src="satisfying.png" class="mooie-afb" width="688" height="214">
+        <p>
+            Vind jij de ans LaTeX editor ook zo vervelend? Schrijf hier je mooie LaTeX met live preview en we geven je automatisch een lelijke versie die werkt met ans.
+        </p>
+        <!-- <ul>
+            <li>Line breaks worden spaties</li>
+            <li><code>$</code> wordt <code>$$</code>, <code>$$</code> wordt <code>$$$</code></li>
+            <li>Een aantal (lees: één) niet ondersteunde commando's worden vervangen</li>
+        </ul> -->
+        <table>
+            <tr>
+                <th class="half-width"><h2>Latex input</h2></th>
+                <th class="half-width"><h2>Latex preview</h2></th>
+            </tr>
+            <tr>
+                <td class="half-width">
+                    <textarea id="input"></textarea>
+                </td>
+                <td class="half-width">
+                    <p id="rendered-output"></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <h2>Latex voor ans</h2>
+                    <textarea placeholder="typ hierboven wat" id="ans-output" readonly></textarea>
+                </td>
+            </tr>
+        </table>
+
+        <footer>
+            Werkt het beste op: <img src="ieexplode.gif">
+        </footer>
+
+
+        <script>
+            let input = document.getElementById('input');
+            let ansOutput = document.getElementById('ans-output');
+            let renderedOutput = document.getElementById('rendered-output');
+
+            function ansify(input) {
+                return input
+                        .replace(/\n/g, " ")
+                        .replace(/\$/g, '$$$') // drie dollar is twee dollar?
+                        .replace(/\$\$\$\$/g, '$$$$$') // en dan hebben we hier natuurlijk 5 dollars nodig in plaats van 3?
+                        .replace(/\\argmax/g, '\\arg \\max');
+                // suggesties welkom
+            }
+
+            function handleError(message, e) {
+                renderedOutput.innerHTML =
+                            '<span style="color: red">latex error:</span><br>' +
+                            e.message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            function handleUpdate() {
+                input.style.height = 'auto';
+                input.style.height = `${input.scrollHeight}px`;
+
+                ansOutput.value = ansify(input.value);
+
+                let delimiters = [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                ];
+
+                renderedOutput.innerHTML = input.value;
+                renderMathInElement(renderedOutput, {
+                    'delimiters': delimiters,
+                    'errorCallback': handleError,
+                });
+
+                ansOutput.style.height = 'auto';
+                ansOutput.style.height = `${ansOutput.scrollHeight}px`;
+            }
+
+            input.addEventListener('input', handleUpdate, false);
+            (function() {
+                input.value = "Inverse van $2 \\times 2$ matrix:\n" +
+                    "$$\n" +
+                    "\\begin{align*}\n" +
+                    "A^{-1} &=\n" +
+                    "\\begin{pmatrix}\n" +
+                    "a & b \\\\\n" +
+                    "c & d\n" +
+                    "\\end{pmatrix}^{-1}\n" +
+                    "\\\\\n" +
+                    "&=\n" +
+                    "\\frac{1}{ad - bc}\n" +
+                    "\\begin{pmatrix}\n" +
+                    "d & -b \\\\\n" +
+                    "-c & a\n" +
+                    "\\end{pmatrix}\n" +
+                    "\\end{align*}\n" +
+                    "$$\n";
+                setTimeout(handleUpdate, 200);
+            })();
+        </script>
+    </body>
+</html>
