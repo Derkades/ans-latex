@@ -96,14 +96,14 @@
             Werkt het beste op: <img src="ieexplode.gif">
         </footer>
 
-
         <script>
-            let input = document.getElementById('input');
-            let ansOutput = document.getElementById('ans-output');
-            let renderedOutput = document.getElementById('rendered-output');
+            let needsRender = false;
+            const input = document.getElementById('input');
+            const ansOutput = document.getElementById('ans-output');
+            const renderedOutput = document.getElementById('rendered-output');
 
-            function ansify(input) {
-                return input
+            function ansify(inputString) {
+                return inputString
                         .replace(/\n/g, " ")
                         .replace(/\$/g, '$$$') // drie dollar is twee dollar?
                         .replace(/\$\$\$\$/g, '$$$$$') // en dan hebben we hier natuurlijk 5 dollars nodig in plaats van 3?
@@ -118,6 +118,11 @@
             }
 
             function handleUpdate() {
+                if (!needsRender) {
+                    return;
+                }
+                needsRender = false;
+
                 input.style.height = 'auto';
                 input.style.height = `${input.scrollHeight}px`;
 
@@ -138,8 +143,9 @@
                 ansOutput.style.height = `${ansOutput.scrollHeight}px`;
             }
 
-            input.addEventListener('input', handleUpdate, false);
-            (function() {
+            input.addEventListener('input', () => needsRender = true);
+
+            document.addEventListener('DOMContentLoaded', () => {
                 input.value = "Inverse van $2 \\times 2$ matrix:\n" +
                     "$$\n" +
                     "\\begin{align*}\n" +
@@ -157,8 +163,11 @@
                     "\\end{pmatrix}\n" +
                     "\\end{align*}\n" +
                     "$$\n";
-                setTimeout(handleUpdate, 200);
-            })();
+                needsRender = true;
+
+                // Render once every 100ms instead of on every input to save CPU
+                setInterval(handleUpdate, 100);
+            });
         </script>
     </body>
 </html>
